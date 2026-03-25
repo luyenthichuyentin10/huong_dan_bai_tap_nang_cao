@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn và mô phỏng bài tập</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <script>window.MathJax = { tex: { inlineMath: [['$', '$']] } };</script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+
+    <style>
+        /* Tinh chỉnh để Code hiển thị đẹp hơn với Highlight.js */
+        pre code.hljs {
+            padding: 1.5em;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <header id="main-header">
+        <button class="toggle-btn" onclick="toggleSidebar()">☰ <span>MENU</span></button>
+        <h1 class="header-title">HỆ THỐNG HƯỚNG DẪN VÀ MÔ PHỎNG BÀI TẬP LẬP TRÌNH THI ĐẤU CƠ BẢN</h1>
+    </header>
+
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="menu-category" onclick="toggleSubmenu('sub1')">14. TƯ TƯỞNG QUY HOẠCH ĐỘNG <span>▾</span></div>
+            <div id="sub1" class="submenu">
+                <a href="#" class="menu-item" onclick="loadLesson('dp_bitcoin')">Bài: Bitcoin</a>
+                <a href="#" class="menu-item" onclick="loadLesson('dp_tangiam')">Bài: Dãy con tăng giảm</a>
+                <a href="#" class="menu-item" onclick="loadLesson('dp_Spali')">Bài: Chuỗi con đối xứng</a>
+            </div>
+        </nav>
+
+        <main id="main-content">
+            <div id="render-content">
+                <div class="step-card border-blue">
+                    <h2 style="text-align: center;">Chào mừng bạn đến với hệ thống hướng dẫn và mô phỏng bài tập</h2>
+                    <p style="text-align: center;">Vui lòng chọn một chuyên đề ở Menu bên trái để bắt đầu.</p>
+                </div>
+            </div>
+            <footer class="teacher-footer">
+                <div class="footer-title">Thầy Hoàng Đăng Quang - Luyện thi Chuyên Tin 10</div>
+                <div class="footer-info">
+                    <span class="footer-item">📞 0903781593</span>
+                    <a href="http://luyenthichuyentin10.edu.vn" target="_blank" class="footer-item">🌐 luyenthichuyentin10.edu.vn</a>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('main-content').classList.toggle('expanded');
+        }
+
+        function toggleSubmenu(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
+
+        async function loadLesson(lessonId) {
+            const renderArea = document.getElementById('render-content');
+            renderArea.innerHTML = "<p>Đang tải nội dung...</p>";
+
+            try {
+                // Tải file markdown (Thêm cache breaker để tránh lỗi không đổi nội dung)
+                const response = await fetch(`lessons/${lessonId}.md?v=${new Date().getTime()}`);
+                if (!response.ok) throw new Error("Không tìm thấy file bài học .md");
+                
+                const markdown = await response.text();
+
+                // 2. Render Markdown trước
+                if (typeof marked !== 'undefined') {
+                    renderArea.innerHTML = marked.parse(markdown);
+                    
+                    // Highlight code
+                    renderArea.querySelectorAll('pre code').forEach((el) => {
+                        // Chỉ highlight nếu block code có khai báo ngôn ngữ (ví dụ: ```cpp)
+                        // Hoặc nếu nội dung có dấu hiệu của mã nguồn (chứa dấu ngoặc, từ khóa...)
+                        const isCpp = el.classList.contains('language-cpp') || el.classList.contains('cpp');
+                        const isPseudocode = el.classList.contains('pseudocode');
+
+                        if (isCpp) {
+                            hljs.highlightElement(el);
+                        } else if (isPseudocode) {
+                            // Không gọi hljs cho mã giả để tránh lỗi 'undefined'
+                            // Mã giả sẽ được bôi màu bằng logic riêng của thầy (nếu có)
+                            el.classList.add('hljs'); // Giữ style nền tối
+                        } else {
+                            // Với các số liệu Test case, ta giữ nguyên style nhưng không highlight
+                            el.classList.add('hljs'); 
+                            el.style.color = "#e9ebee"; // Màu chữ sáng mặc định
+                        }
+                    });
+
+                    // MathJax
+                    if (window.MathJax) MathJax.typesetPromise();
+                }
+
+                // 4. Highlight code (Sử dụng cấu trúc ổn định của bạn)
+                renderArea.querySelectorAll('pre code').forEach((el) => { 
+                    // Chỉ highlight nếu block code có khai báo ngôn ngữ (ví dụ: ```cpp)
+                    // Hoặc nếu nội dung có dấu hiệu của mã nguồn (chứa dấu ngoặc, từ khóa...)
+                    const isCpp = el.classList.contains('language-cpp') || el.classList.contains('cpp');
+                    const isPseudocode = el.classList.contains('pseudocode');
+
+                    if (isCpp) {
+                        hljs.highlightElement(el);
+                    } else if (isPseudocode) {
+                        // Không gọi hljs cho mã giả để tránh lỗi 'undefined'
+                        // Mã giả sẽ được bôi màu bằng logic riêng của thầy (nếu có)
+                        el.classList.add('hljs'); // Giữ style nền tối
+                    } else {
+                        // Với các số liệu Test case, ta giữ nguyên style nhưng không highlight
+                        el.classList.add('hljs'); 
+                        el.style.color = "#e9ebee"; // Màu chữ sáng mặc định
+                    } 
+                });
+
+                // 5. BỔ SUNG: Kích hoạt MathJax để vẽ công thức toán học
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    MathJax.typesetPromise([renderArea]).catch((err) => console.log(err));
+                }
+
+                // 6. BỔ SUNG: Cuộn về đầu trang sau khi nạp bài mới
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // 2. Chèn "vùng chứa mô phỏng"
+                const simContainer = document.createElement('div');
+                simContainer.id = 'simulation-area';
+                renderArea.appendChild(simContainer);
+
+                // 3. Xử lý Script mô phỏng
+                const oldScript = document.getElementById('dynamic-sim-script');
+                if (oldScript) oldScript.remove();
+
+                const script = document.createElement('script');
+                script.id = 'dynamic-sim-script';
+                script.src = `simulations/${lessonId}.js`;
+                
+                script.onload = () => {
+                    const initFuncName = `init${lessonId.charAt(0).toUpperCase() + lessonId.slice(1)}Simulation`;
+                    if (typeof window[initFuncName] === 'function') {
+                        window[initFuncName]();
+                    }
+                };
+
+                // Bổ sung: Xử lý trường hợp không có file .js mô phỏng cho bài này
+                script.onerror = () => {
+                    console.warn(`Không tìm thấy file mô phỏng: simulations/${lessonId}.js`);
+                    simContainer.remove(); // Xóa vùng chứa nếu không có script mô phỏng
+                };
+
+                document.body.appendChild(script);
+            } catch (error) {
+                renderArea.innerHTML = `
+                    <div class="step-card border-red">
+                        <h2 style="color:red">Lỗi tải bài học</h2>
+                        <p>${error.message}</p>
+                    </div>`;
+            }
+        }
+    </script>
+</body>
+</html>
